@@ -35,6 +35,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->get('/my-bookings', [BookingController::class, 'userBookings'])->name('user.bookings');
 
 Route::get('/bookings/{booking}', [BookingController::class, 'showBooking'])->name('bookings.show');
+Route::get('/bookings/summary/{trip}', [BookingController::class, 'showBookingSummary'])->name('bookings.summary');
 
 // Admin Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {

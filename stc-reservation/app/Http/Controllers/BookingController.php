@@ -45,13 +45,18 @@ class BookingController extends Controller
     {
         $this->abortIfAdmin();
         $request->validate([
-            'seat_id' => 'required|exists:seats,id',
+            'seat_ids' => 'required|array|min:1',
+            'seat_ids.*' => 'exists:seats,id',
         ]);
 
-        // Check if seat is already booked for this trip
-        $alreadyBooked = $trip->bookings()->where('seat_id', $request->seat_id)->exists();
-        if ($alreadyBooked) {
-            return back()->with('error', 'Seat already booked!');
+        $seatIds = $request->seat_ids;
+        $bookings = [];
+
+        // Check if any seats are already booked
+        $alreadyBookedSeats = $trip->bookings()->whereIn('seat_id', $seatIds)->pluck('seat_id')->toArray();
+        if (!empty($alreadyBookedSeats)) {
+            $seatNumbers = \App\Models\Seat::whereIn('id', $alreadyBookedSeats)->pluck('seat_number')->toArray();
+            return back()->with('error', 'Seat(s) ' . implode(', ', $seatNumbers) . ' already booked!');
         }
 
         // Set expiry time (24 hours from now, or 1 hour before trip departure, whichever is earlier)
@@ -63,18 +68,33 @@ class BookingController extends Controller
             $expiresAt = $oneHourBeforeTrip;
         }
 
-        $booking = \App\Models\Booking::create([
-            'user_id' => Auth::id(),
-            'trip_id' => $trip->id,
-            'seat_id' => $request->seat_id,
-            'status' => 'booked',
-            'expires_at' => $expiresAt,
-        ]);
+        // Create bookings for each selected seat
+        foreach ($seatIds as $seatId) {
+            $booking = \App\Models\Booking::create([
+                'user_id' => Auth::id(),
+                'trip_id' => $trip->id,
+                'seat_id' => $seatId,
+                'status' => 'booked',
+                'expires_at' => $expiresAt,
+            ]);
 
-        // Generate QR code
-        $this->generateQRCode($booking);
+            // Generate QR code for each booking
+            $this->generateQRCode($booking);
+            
+            $bookings[] = $booking;
+        }
 
-        return redirect()->route('bookings.show', $booking->id)->with('success', 'Seat booked successfully!');
+        $seatCount = count($bookings);
+        $message = $seatCount === 1 
+            ? 'Seat booked successfully!' 
+            : "{$seatCount} seats booked successfully!";
+
+        // If multiple bookings, redirect to a summary page, otherwise to the single booking
+        if ($seatCount > 1) {
+            return redirect()->route('bookings.summary', ['trip' => $trip->id])->with('success', $message);
+        } else {
+            return redirect()->route('bookings.show', $bookings[0]->id)->with('success', $message);
+        }
     }
 
     public function showBooking(\App\Models\Booking $booking)
@@ -100,6 +120,25 @@ class BookingController extends Controller
             ->get();
 
         return view('booking.user_bookings', compact('bookings'));
+    }
+
+    public function showBookingSummary(\App\Models\Trip $trip)
+    {
+        $this->abortIfAdmin();
+        
+        // Get all bookings for this trip by the current user
+        $bookings = \App\Models\Booking::with(['trip.route', 'trip.bus', 'seat'])
+            ->where('trip_id', $trip->id)
+            ->where('user_id', Auth::id())
+            ->whereDate('created_at', today()) // Only today's bookings
+            ->latest()
+            ->get();
+
+        if ($bookings->isEmpty()) {
+            return redirect()->route('routes.index')->with('error', 'No bookings found for this trip.');
+        }
+
+        return view('booking.summary', compact('bookings', 'trip'));
     }
 
     private function generateQRCode(\App\Models\Booking $booking)

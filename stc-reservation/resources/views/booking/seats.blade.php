@@ -10,7 +10,7 @@
                 <li><i class="bi bi-chevron-right"></i></li>
                 <li><a href="{{ route('routes.trips', $trip->route) }}" class="hover:text-blue-600 transition">{{ $trip->route->origin }} → {{ $trip->route->destination }}</a></li>
                 <li><i class="bi bi-chevron-right"></i></li>
-                <li class="text-gray-800 font-medium">Select Seat</li>
+                <li class="text-gray-800 font-medium">Select Seats</li>
             </ol>
         </nav>
         <!-- Trip Info Header -->
@@ -19,7 +19,7 @@
                 <div>
                     <h1 class="text-lg sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">
                         <i class="bi bi-grid-1x2 text-blue-600 me-2"></i>
-                        Select Your Seat
+                        Select Your Seats
                     </h1>
                     <div class="text-gray-600 text-xs sm:text-sm">
                         <div class="flex items-center mb-1">
@@ -97,11 +97,11 @@
                                 $isAisle = ($col == '2'); // Add space after seat 2 for aisle
                             @endphp
                             <div class="relative">
-                                <input type="radio" 
-                                       name="seat_id" 
+                                <input type="checkbox" 
+                                       name="seat_ids[]" 
                                        value="{{ $seat->id }}" 
                                        id="seat_{{ $seat->id }}"
-                                       class="sr-only seat-radio"
+                                       class="sr-only seat-checkbox"
                                        {{ $isBooked ? 'disabled' : '' }}>
                                 <label for="seat_{{ $seat->id }}" 
                                        class="seat-label w-10 h-10 sm:w-12 sm:h-12 rounded-lg border-2 cursor-pointer transition-all duration-200 flex items-center justify-center text-white font-bold text-xs sm:text-sm
@@ -115,12 +115,15 @@
                         @endforeach
                     </div>
                 </div>
-                <!-- Selected Seat Info -->
-                <div id="selectedSeatInfo" class="text-center py-4 hidden">
+                <!-- Selected Seats Info -->
+                <div id="selectedSeatsInfo" class="text-center py-4 hidden">
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 inline-block text-xs sm:text-sm">
-                        <div class="text-blue-800">
+                        <div class="text-blue-800 mb-2">
                             <i class="bi bi-check-circle me-2"></i>
-                            Selected Seat: <span id="selectedSeatNumber" class="font-bold"></span>
+                            Selected Seats: <span id="selectedSeatsList" class="font-bold"></span>
+                        </div>
+                        <div class="text-blue-700">
+                            Total Seats: <span id="selectedSeatsCount" class="font-bold">0</span>
                         </div>
                     </div>
                 </div>
@@ -131,7 +134,7 @@
                             class="bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 px-6 sm:px-8 rounded-lg font-semibold transition duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-xs sm:text-sm"
                             disabled>
                         <i class="bi bi-ticket-perforated me-2"></i>
-                        Book Selected Seat
+                        Book Selected Seats
                     </button>
                 </div>
             </div>
@@ -148,34 +151,55 @@
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const seatRadios = document.querySelectorAll('.seat-radio');
-    const selectedSeatInfo = document.getElementById('selectedSeatInfo');
-    const selectedSeatNumber = document.getElementById('selectedSeatNumber');
+    const seatCheckboxes = document.querySelectorAll('.seat-checkbox');
+    const selectedSeatsInfo = document.getElementById('selectedSeatsInfo');
+    const selectedSeatsList = document.getElementById('selectedSeatsList');
+    const selectedSeatsCount = document.getElementById('selectedSeatsCount');
     const bookButton = document.getElementById('bookButton');
-    seatRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            document.querySelectorAll('.seat-label').forEach(label => {
-                if (!label.classList.contains('bg-red-500')) {
-                    label.classList.remove('bg-blue-500', 'border-blue-600');
-                    label.classList.add('bg-green-500', 'border-green-600');
-                }
+    const seatLabels = document.querySelectorAll('.seat-label');
+
+    function updateSelectedSeats() {
+        const selectedSeats = Array.from(seatCheckboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => {
+                const label = document.querySelector(`label[for="${checkbox.id}"]`);
+                return label.textContent.trim();
             });
+
+        const count = selectedSeats.length;
+        
+        if (count > 0) {
+            selectedSeatsInfo.classList.remove('hidden');
+            selectedSeatsList.textContent = selectedSeats.join(', ');
+            selectedSeatsCount.textContent = count;
+            bookButton.disabled = false;
+            bookButton.innerHTML = `<i class="bi bi-ticket-perforated me-2"></i>Book ${count} Seat${count > 1 ? 's' : ''}`;
+        } else {
+            selectedSeatsInfo.classList.add('hidden');
+            bookButton.disabled = true;
+            bookButton.innerHTML = `<i class="bi bi-ticket-perforated me-2"></i>Book Selected Seats`;
+        }
+    }
+
+    // Handle seat selection
+    seatCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const label = document.querySelector(`label[for="${this.id}"]`);
+            
             if (this.checked) {
-                const label = document.querySelector(`label[for="${this.id}"]`);
-                label.classList.remove('bg-green-500', 'border-green-600');
+                label.classList.remove('bg-green-500', 'border-green-600', 'hover:bg-green-600');
                 label.classList.add('bg-blue-500', 'border-blue-600');
-                selectedSeatNumber.textContent = label.textContent.trim();
-                selectedSeatInfo.classList.remove('hidden');
-                bookButton.disabled = false;
+            } else {
+                label.classList.remove('bg-blue-500', 'border-blue-600');
+                label.classList.add('bg-green-500', 'border-green-600', 'hover:bg-green-600');
             }
+            
+            updateSelectedSeats();
         });
     });
+
+    // Initialize
+    updateSelectedSeats();
 });
 </script>
-<style>
-.seat-radio:checked + .seat-label {
-    background-color: #3b82f6 !important;
-    border-color: #2563eb !important;
-}
-</style>
 @endsection

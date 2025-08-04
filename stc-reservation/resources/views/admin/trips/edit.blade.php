@@ -7,12 +7,13 @@
             <a href="{{ route('admin.trips.index') }}" class="text-blue-600 hover:text-blue-800 mr-4">
                 <i class="bi bi-arrow-left text-xl"></i>
             </a>
-            <h1 class="text-3xl font-bold text-gray-800">Schedule New Trip</h1>
+            <h1 class="text-3xl font-bold text-gray-800">Edit Trip</h1>
         </div>
 
         <div class="bg-white rounded-lg shadow p-6">
-            <form action="{{ route('admin.trips.store') }}" method="POST">
+            <form action="{{ route('admin.trips.update', $trip) }}" method="POST">
                 @csrf
+                @method('PUT')
                 
                 <div class="mb-6">
                     <label for="route_id" class="block text-sm font-medium text-gray-700 mb-2">Route</label>
@@ -22,8 +23,8 @@
                             required>
                         <option value="">Select a route</option>
                         @foreach($routes as $route)
-                            <option value="{{ $route->id }}" {{ old('route_id') == $route->id ? 'selected' : '' }}>
-                                {{ $route->origin }} → {{ $route->destination }}
+                            <option value="{{ $route->id }}" {{ old('route_id', $trip->route_id) == $route->id ? 'selected' : '' }}>
+                                {{ $route->origin }} → {{ $route->destination }} (₵{{ number_format($route->price, 2) }})
                             </option>
                         @endforeach
                     </select>
@@ -40,7 +41,7 @@
                             required>
                         <option value="">Select a bus</option>
                         @foreach($buses as $bus)
-                            <option value="{{ $bus->id }}" {{ old('bus_id') == $bus->id ? 'selected' : '' }}>
+                            <option value="{{ $bus->id }}" {{ old('bus_id', $trip->bus_id) == $bus->id ? 'selected' : '' }}>
                                 {{ $bus->name }} ({{ $bus->seat_count }} seats)
                             </option>
                         @endforeach
@@ -56,8 +57,7 @@
                         <input type="date" 
                                id="departure_date" 
                                name="departure_date" 
-                               value="{{ old('departure_date', date('Y-m-d')) }}"
-                               min="{{ date('Y-m-d') }}"
+                               value="{{ old('departure_date', $trip->departure_date->format('Y-m-d')) }}"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                required>
                         @error('departure_date')
@@ -70,7 +70,7 @@
                         <input type="time" 
                                id="departure_time" 
                                name="departure_time" 
-                               value="{{ old('departure_time', '08:00') }}"
+                               value="{{ old('departure_time', $trip->departure_time->format('H:i')) }}"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                required>
                         @error('departure_time')
@@ -87,7 +87,7 @@
                     <input type="number" 
                            id="price" 
                            name="price" 
-                           value="{{ old('price') }}"
+                           value="{{ old('price', $trip->price) }}"
                            step="0.01"
                            min="0"
                            placeholder="Enter custom price or leave empty for route default"
@@ -97,37 +97,21 @@
                     @enderror
                     <p class="text-sm text-gray-500 mt-1">
                         <i class="bi bi-info-circle me-1"></i>
-                        If left empty, the route's default price will be used for this trip.
+                        Current effective price: <strong>₵{{ number_format($trip->effective_price, 2) }}</strong>
+                        @if($trip->hasCustomPrice())
+                            <span class="text-blue-600">(Custom price set)</span>
+                        @else
+                            <span class="text-gray-600">(Using route default)</span>
+                        @endif
                     </p>
                 </div>
-
-                @if($routes->isEmpty() || $buses->isEmpty())
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
-                        <div class="flex items-start">
-                            <i class="bi bi-exclamation-triangle text-yellow-600 mt-0.5 mr-3"></i>
-                            <div>
-                                <h4 class="text-sm font-medium text-yellow-800">Missing Requirements</h4>
-                                <div class="text-sm text-yellow-700 mt-1">
-                                    @if($routes->isEmpty())
-                                        <p>• You need to <a href="{{ route('admin.routes.create') }}" class="underline">create at least one route</a> first.</p>
-                                    @endif
-                                    @if($buses->isEmpty())
-                                        <p>• You need to <a href="{{ route('admin.buses.create') }}" class="underline">add at least one bus</a> first.</p>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
 
                 <div class="flex justify-end space-x-4">
                     <a href="{{ route('admin.trips.index') }}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
                         Cancel
                     </a>
-                    <button type="submit" 
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 {{ ($routes->isEmpty() || $buses->isEmpty()) ? 'opacity-50 cursor-not-allowed' : '' }}"
-                            {{ ($routes->isEmpty() || $buses->isEmpty()) ? 'disabled' : '' }}>
-                        Schedule Trip
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        Update Trip
                     </button>
                 </div>
             </form>

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\BookingConfirmed;
 
 class BookingController extends Controller
 {
@@ -21,14 +22,75 @@ class BookingController extends Controller
     public function showRoutes()
     {
         $this->abortIfAdmin();
-        $routes = \App\Models\Route::all();
+        
+        // Get routes that have trips with available seats and future departure times
+        $routes = \App\Models\Route::whereHas('trips', function ($query) {
+            $query->where('departure_date', '>=', now()->toDateString())
+                  ->whereHas('bus', function ($busQuery) {
+                      $busQuery->whereHas('seats', function ($seatQuery) {
+                          // Get seats that are not booked for this trip
+                          $seatQuery->whereDoesntHave('bookings', function ($bookingQuery) {
+                              $bookingQuery->whereColumn('bookings.trip_id', 'trips.id');
+                          });
+                      });
+                  });
+        })->get();
+        
         return view('booking.routes', compact('routes'));
+    }
+
+    public function showAvailableTrips()
+    {
+        $this->abortIfAdmin();
+        
+        // Get all available trips with their route, bus, and seat availability information
+        $trips = \App\Models\Trip::with(['route', 'bus'])
+            ->where('departure_date', '>=', now()->toDateString())
+            ->whereHas('bus.seats', function ($seatQuery) {
+                // Get seats that are not booked for this trip
+                $seatQuery->whereDoesntHave('bookings', function ($bookingQuery) {
+                    $bookingQuery->whereColumn('bookings.trip_id', 'trips.id');
+                });
+            })
+            ->orderBy('departure_date')
+            ->orderBy('departure_time')
+            ->get()
+            ->map(function ($trip) {
+                // Calculate available seats for each trip
+                $totalSeats = $trip->bus->seats()->count();
+                $bookedSeats = $trip->bookings()->count();
+                $availableSeats = $totalSeats - $bookedSeats;
+                
+                $trip->available_seats = $availableSeats;
+                $trip->total_seats = $totalSeats;
+                $trip->occupancy_percentage = $totalSeats > 0 ? ($bookedSeats / $totalSeats) * 100 : 0;
+                
+                return $trip;
+            });
+        
+        return view('booking.available_trips', compact('trips'));
     }
 
     public function showTrips(\App\Models\Route $route)
     {
         $this->abortIfAdmin();
-        $trips = $route->trips()->with('bus')->get();
+        $trips = $route->trips()->with('bus')
+            ->where('departure_date', '>=', now()->toDateString())
+            ->orderBy('departure_date')
+            ->orderBy('departure_time')
+            ->get()
+            ->map(function ($trip) {
+                // Calculate available seats for each trip
+                $totalSeats = $trip->bus->seats()->count();
+                $bookedSeats = $trip->bookings()->count();
+                $availableSeats = $totalSeats - $bookedSeats;
+                
+                $trip->available_seats = $availableSeats;
+                $trip->total_seats = $totalSeats;
+                $trip->occupancy_percentage = $totalSeats > 0 ? ($bookedSeats / $totalSeats) * 100 : 0;
+                
+                return $trip;
+            });
         return view('booking.trips', compact('route', 'trips'));
     }
 
@@ -61,7 +123,7 @@ class BookingController extends Controller
 
         // Set expiry time (24 hours from now, or 1 hour before trip departure, whichever is earlier)
         $expiresAt = now()->addHours(24);
-        $tripDepartureTime = \Carbon\Carbon::parse($trip->departure_date . ' ' . $trip->departure_time);
+        $tripDepartureTime = \Carbon\Carbon::parse($trip->departure_date)->setTimeFrom($trip->departure_time);
         $oneHourBeforeTrip = $tripDepartureTime->subHour();
         
         if ($oneHourBeforeTrip->isFuture() && $oneHourBeforeTrip->lt($expiresAt)) {
@@ -86,8 +148,16 @@ class BookingController extends Controller
 
         $seatCount = count($bookings);
         $message = $seatCount === 1 
-            ? 'Seat booked successfully!' 
+            ? 'Seat booked successfully!'
             : "{$seatCount} seats booked successfully!";
+
+        // Send email notification
+        $user = $bookings[0]->user;
+        if ($seatCount > 1) {
+            $user->notify(new \App\Notifications\MultipleBookingsConfirmed(collect($bookings), $trip));
+        } else {
+            $user->notify(new \App\Notifications\BookingConfirmed($bookings[0]));
+        }
 
         // If multiple bookings, redirect to a summary page, otherwise to the single booking
         if ($seatCount > 1) {
@@ -115,7 +185,7 @@ class BookingController extends Controller
     {
         $this->abortIfAdmin();
         $bookings = \App\Models\Booking::with(['trip.route', 'trip.bus', 'seat'])
-            ->where('user_id', \Auth::id())
+            ->where('user_id', Auth::id())
             ->latest()
             ->get();
 
@@ -135,7 +205,7 @@ class BookingController extends Controller
             ->get();
 
         if ($bookings->isEmpty()) {
-            return redirect()->route('routes.index')->with('error', 'No bookings found for this trip.');
+            return redirect()->route('book.tickets')->with('error', 'No bookings found for this trip.');
         }
 
         return view('booking.summary', compact('bookings', 'trip'));

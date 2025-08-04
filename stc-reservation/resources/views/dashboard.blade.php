@@ -33,9 +33,16 @@
             <x-action-card 
                 href="{{ route('routes.index') }}"
                 icon="geo-alt"
+                title="View Routes"
+                description="Browse all available routes"
+                icon-color="blue" />
+
+            <x-action-card 
+                href="{{ route('book.tickets') }}"
+                icon="ticket-perforated"
                 title="Book a Trip"
                 description="Find and book your next journey"
-                icon-color="blue" />
+                icon-color="green" />
 
             <x-action-card 
                 href="#"

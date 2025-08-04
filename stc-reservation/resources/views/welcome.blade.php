@@ -8,10 +8,16 @@
     <div class="relative z-10 text-center max-w-2xl px-4 py-16 sm:py-24">
         <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 drop-shadow-lg">Travel Smart with STC</h1>
         <p class="text-base sm:text-lg md:text-xl mb-8 drop-shadow">Book your seat online, receive your QR code ticket, and travel with comfort across Ghana.</p>
-        <a href="{{ route('routes.index') }}"
-           class="inline-block bg-white text-blue-700 font-semibold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-full shadow-lg transition duration-300 hover:bg-blue-50 hover:shadow-xl transform hover:-translate-y-1">
-            <i class="bi bi-ticket-perforated me-2"></i> Start Booking
-        </a>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{{ route('routes.index') }}"
+               class="inline-block bg-white text-blue-700 font-semibold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-full shadow-lg transition duration-300 hover:bg-blue-50 hover:shadow-xl transform hover:-translate-y-1">
+                <i class="bi bi-geo-alt me-2"></i> View Routes
+            </a>
+            <a href="{{ route('book.tickets') }}"
+               class="inline-block bg-blue-600 text-white font-semibold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-full shadow-lg transition duration-300 hover:bg-blue-700 hover:shadow-xl transform hover:-translate-y-1">
+                <i class="bi bi-ticket-perforated me-2"></i> Book Tickets
+            </a>
+        </div>
     </div>
 </div>
 
@@ -99,7 +105,11 @@
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="{{ route('routes.index') }}"
                class="inline-block bg-white text-blue-800 font-semibold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-full shadow-lg transition duration-300 hover:bg-gray-100 transform hover:-translate-y-1">
-                <i class="bi bi-geo-alt me-2"></i> Reserve Your Seat Now
+                <i class="bi bi-geo-alt me-2"></i> View Routes
+            </a>
+            <a href="{{ route('book.tickets') }}"
+               class="inline-block bg-blue-600 text-white font-semibold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-full shadow-lg transition duration-300 hover:bg-blue-700 transform hover:-translate-y-1">
+                <i class="bi bi-ticket-perforated me-2"></i> Book Tickets
             </a>
             @guest
             <a href="{{ route('register') }}"

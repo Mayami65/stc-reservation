@@ -82,11 +82,7 @@
                 <div class="space-y-3 md:space-y-4">
                     <!-- Status and Info -->
                     <div class="flex items-center justify-between">
-                        <span class="px-2 py-1 text-xs rounded-full font-medium
-                            @if($booking->status === 'booked') bg-blue-100 text-blue-800
-                            @elseif($booking->status === 'checked-in') bg-green-100 text-green-800
-                            @elseif($booking->status === 'cancelled') bg-red-100 text-red-800
-                            @else bg-gray-100 text-gray-800 @endif">
+                        <span class="px-2 py-1 text-xs rounded-full font-medium status-badge status-{{ $booking->status }}">
                             {{ ucfirst($booking->status) }}
                         </span>
                         <div class="text-xs text-gray-500">
@@ -173,7 +169,7 @@
             <i class="bi bi-emoji-frown text-6xl text-gray-400 mb-6"></i>
             <h3 class="text-lg font-semibold text-gray-600 mb-2">No bookings yet</h3>
             <p class="text-gray-500 text-sm mb-6">You haven't made any bookings yet. Start your journey with STC!</p>
-            <a href="{{ route('routes.index') }}" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200">
+                            <a href="{{ route('book.tickets') }}" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200">
                 <i class="bi bi-plus-circle me-2"></i>
                 Book Your First Trip
             </a>
@@ -294,6 +290,27 @@
     
     .booking-card:hover {
         border-color: #3b82f6;
+    }
+
+    /* Status badge styling */
+    .status-badge.status-booked {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .status-badge.status-checked-in {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+    
+    .status-badge.status-cancelled {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .status-badge.status-completed {
+        background-color: #f3f4f6;
+        color: #374151;
     }
 </style>
 @endsection 

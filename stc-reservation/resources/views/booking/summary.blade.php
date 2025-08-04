@@ -134,7 +134,7 @@
 
         <!-- Action Buttons -->
         <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="{{ route('routes.index') }}" 
+                            <a href="{{ route('book.tickets') }}" 
                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg text-center font-medium transition">
                 <i class="bi bi-plus-circle mr-2"></i> Book More Trips
             </a>

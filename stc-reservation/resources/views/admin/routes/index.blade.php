@@ -80,10 +80,14 @@
                 <div class="p-6">
                     <div class="space-y-4">
                         <!-- Route Statistics -->
-                        <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="grid grid-cols-3 gap-4 text-sm">
                             <div class="bg-gray-50 rounded-lg p-3 text-center">
                                 <div class="text-gray-600 mb-1">Total Trips</div>
                                 <div class="font-bold text-gray-800">{{ $route->trips_count ?? $route->trips()->count() }}</div>
+                            </div>
+                            <div class="bg-green-50 rounded-lg p-3 text-center border border-green-200">
+                                <div class="text-green-600 mb-1">Price</div>
+                                <div class="font-bold text-green-800 text-lg">₵{{ number_format($route->price, 2) }}</div>
                             </div>
                             <div class="bg-gray-50 rounded-lg p-3 text-center">
                                 <div class="text-gray-600 mb-1">Created</div>
@@ -96,6 +100,10 @@
                             <div class="flex items-center text-sm text-gray-600">
                                 <i class="bi bi-calendar-week me-2 text-blue-600"></i>
                                 <span>{{ $route->trips_count ?? $route->trips()->count() }} scheduled trips</span>
+                            </div>
+                            <div class="flex items-center text-sm text-green-600">
+                                <i class="bi bi-currency-dollar me-2 text-green-600"></i>
+                                <span>₵{{ number_format($route->price, 2) }} per seat</span>
                             </div>
                             <div class="flex items-center text-sm text-gray-600">
                                 <i class="bi bi-clock-history me-2 text-blue-600"></i>

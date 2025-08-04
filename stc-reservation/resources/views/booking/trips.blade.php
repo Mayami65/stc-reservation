@@ -60,7 +60,7 @@
                                             <span class="ml-0 sm:ml-3 mt-2 sm:mt-0 inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">Past</span>
                                         @endif
                                     </div>
-                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
                                         <div>
                                             <div class="text-xs sm:text-sm text-gray-600 mb-1">
                                                 <i class="bi bi-calendar3 me-1"></i>Date
@@ -99,6 +99,15 @@
                                                 </div>
                                                 <span class="text-xs text-gray-600">{{ round($occupancyPercentage) }}%</span>
                                             </div>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs sm:text-sm text-gray-600 mb-1">
+                                                <i class="bi bi-currency-dollar me-1"></i>Price
+                                            </div>
+                                            <div class="font-semibold text-green-600 text-lg">
+                                                ₵{{ number_format($trip->route->price, 2) }}
+                                            </div>
+                                            <div class="text-xs text-gray-500">per seat</div>
                                         </div>
                                     </div>
                                 </div>

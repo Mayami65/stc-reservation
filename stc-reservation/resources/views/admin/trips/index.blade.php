@@ -90,7 +90,7 @@
                 <div class="p-6">
                     <div class="space-y-4">
                         <!-- Trip Statistics -->
-                        <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="grid grid-cols-3 gap-4 text-sm">
                             <div class="bg-gray-50 rounded-lg p-3 text-center">
                                 <div class="text-gray-600 mb-1">Date</div>
                                 <div class="font-bold text-gray-800">{{ \Carbon\Carbon::parse($trip->departure_date)->format('M j, Y') }}</div>
@@ -98,6 +98,10 @@
                             <div class="bg-gray-50 rounded-lg p-3 text-center">
                                 <div class="text-gray-600 mb-1">Time</div>
                                 <div class="font-bold text-gray-800">{{ \Carbon\Carbon::parse($trip->departure_time)->format('g:i A') }}</div>
+                            </div>
+                            <div class="bg-green-50 rounded-lg p-3 text-center border border-green-200">
+                                <div class="text-green-600 mb-1">Price</div>
+                                <div class="font-bold text-green-800 text-lg">₵{{ number_format($trip->route->price, 2) }}</div>
                             </div>
                         </div>
 
@@ -116,7 +120,7 @@
                                 </div>
                             </div>
                             <div class="mt-2 w-full bg-blue-200 rounded-full h-2">
-                                <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $percentage }}%"></div>
+                                <div class="bg-blue-600 h-2 rounded-full progress-bar" data-percentage="{{ $percentage }}"></div>
                             </div>
                         </div>
 
@@ -133,6 +137,10 @@
                             <div class="flex items-center text-sm text-gray-600">
                                 <i class="bi bi-people me-2 text-purple-600"></i>
                                 <span>{{ $trip->bus->seat_count }} seats available</span>
+                            </div>
+                            <div class="flex items-center text-sm text-green-600">
+                                <i class="bi bi-currency-dollar me-2 text-green-600"></i>
+                                <span>₵{{ number_format($trip->route->price, 2) }} per seat</span>
                             </div>
                         </div>
 
@@ -216,4 +224,15 @@
         @endif
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const progressBars = document.querySelectorAll('.progress-bar');
+    progressBars.forEach(bar => {
+        const percentage = bar.getAttribute('data-percentage');
+        bar.style.width = percentage + '%';
+    });
+});
+</script>
+
 @endsection 

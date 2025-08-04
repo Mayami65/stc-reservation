@@ -97,11 +97,11 @@
                     @enderror
                     <p class="text-sm text-gray-500 mt-1">
                         <i class="bi bi-info-circle me-1"></i>
-                        Current effective price: <strong>₵{{ number_format($trip->effective_price, 2) }}</strong>
+                        Current price: <strong>₵{{ number_format($trip->price, 2) }}</strong>
                         @if($trip->hasCustomPrice())
-                            <span class="text-blue-600">(Custom price set)</span>
+                            <span class="text-blue-600">(Custom price - different from route)</span>
                         @else
-                            <span class="text-gray-600">(Using route default)</span>
+                            <span class="text-gray-600">(Same as route price)</span>
                         @endif
                     </p>
                 </div>

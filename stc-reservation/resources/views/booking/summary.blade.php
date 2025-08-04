@@ -27,7 +27,7 @@
         <!-- Trip Information -->
         <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Trip Details</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                     <span class="text-gray-600 text-sm">Route:</span>
                     <p class="font-medium">{{ $trip->route->origin }} → {{ $trip->route->destination }}</p>
@@ -39,6 +39,13 @@
                 <div>
                     <span class="text-gray-600 text-sm">Bus:</span>
                     <p class="font-medium">{{ $trip->bus->name }}</p>
+                </div>
+                <div>
+                    <span class="text-gray-600 text-sm">Price per Seat:</span>
+                    <p class="font-medium text-green-600">₵{{ number_format($trip->price, 2) }}</p>
+                    @if($trip->hasCustomPrice())
+                        <span class="text-xs text-blue-600">(Custom Price)</span>
+                    @endif
                 </div>
             </div>
         </div>
@@ -151,6 +158,8 @@
         <!-- Booking Summary -->
         <div class="mt-8 text-center text-sm text-gray-500">
             <p>Total Bookings: <span class="font-mono font-semibold">{{ $bookings->count() }}</span></p>
+            <p>Price per Seat: <span class="font-mono font-semibold text-green-600">₵{{ number_format($trip->price, 2) }}</span></p>
+            <p>Total Amount: <span class="font-mono font-semibold text-green-600">₵{{ number_format($trip->price * $bookings->count(), 2) }}</span></p>
             <p>Booked on: {{ $bookings->first()->created_at->format('M d, Y \a\t H:i') }}</p>
         </div>
     </div>

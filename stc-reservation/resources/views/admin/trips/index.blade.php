@@ -105,7 +105,7 @@
                                 @if($trip->hasCustomPrice())
                                     <div class="text-xs text-blue-600 mt-1">Custom Price</div>
                                 @else
-                                    <div class="text-xs text-gray-500 mt-1">Route Default</div>
+                                    <div class="text-xs text-gray-500 mt-1">Route Price</div>
                                 @endif
                             </div>
                         </div>
@@ -148,6 +148,8 @@
                                 <span>₵{{ number_format($trip->effective_price, 2) }} per seat</span>
                                 @if($trip->hasCustomPrice())
                                     <span class="text-xs text-blue-600 ml-1">(Custom)</span>
+                                @else
+                                    <span class="text-xs text-gray-500 ml-1">(Route)</span>
                                 @endif
                             </div>
                         </div>

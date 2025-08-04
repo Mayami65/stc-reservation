@@ -146,7 +146,7 @@
                              <div class="text-green-700 mb-1">
                                  <i class="bi bi-currency-dollar me-1"></i>Price
                              </div>
-                                                           <div class="font-bold text-green-800 text-lg">₵{{ number_format($trip->route->price, 2) }}</div>
+                                                           <div class="font-bold text-green-800 text-lg">₵{{ number_format($trip->effective_price, 2) }}</div>
                              <div class="text-xs text-green-600">per seat</div>
                          </div>
                      </div>

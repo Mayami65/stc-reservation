@@ -33,9 +33,17 @@ class TripController extends Controller
             'bus_id' => 'required|exists:buses,id',
             'departure_date' => 'required|date|after_or_equal:today',
             'departure_time' => 'required|date_format:H:i',
+            'price' => 'nullable|numeric|min:0',
         ]);
 
-        Trip::create($request->only(['route_id', 'bus_id', 'departure_date', 'departure_time']));
+        $data = $request->only(['route_id', 'bus_id', 'departure_date', 'departure_time', 'price']);
+        
+        // Convert empty string to null for price
+        if (empty($data['price'])) {
+            $data['price'] = null;
+        }
+
+        Trip::create($data);
 
         return redirect()->route('admin.trips.index')
             ->with('success', 'Trip created successfully.');
@@ -62,9 +70,17 @@ class TripController extends Controller
             'bus_id' => 'required|exists:buses,id',
             'departure_date' => 'required|date',
             'departure_time' => 'required|date_format:H:i',
+            'price' => 'nullable|numeric|min:0',
         ]);
 
-        $trip->update($request->only(['route_id', 'bus_id', 'departure_date', 'departure_time']));
+        $data = $request->only(['route_id', 'bus_id', 'departure_date', 'departure_time', 'price']);
+        
+        // Convert empty string to null for price
+        if (empty($data['price'])) {
+            $data['price'] = null;
+        }
+
+        $trip->update($data);
 
         return redirect()->route('admin.trips.index')
             ->with('success', 'Trip updated successfully.');

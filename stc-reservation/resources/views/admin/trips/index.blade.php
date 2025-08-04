@@ -101,7 +101,12 @@
                             </div>
                             <div class="bg-green-50 rounded-lg p-3 text-center border border-green-200">
                                 <div class="text-green-600 mb-1">Price</div>
-                                <div class="font-bold text-green-800 text-lg">₵{{ number_format($trip->route->price, 2) }}</div>
+                                <div class="font-bold text-green-800 text-lg">₵{{ number_format($trip->effective_price, 2) }}</div>
+                                @if($trip->hasCustomPrice())
+                                    <div class="text-xs text-blue-600 mt-1">Custom Price</div>
+                                @else
+                                    <div class="text-xs text-gray-500 mt-1">Route Default</div>
+                                @endif
                             </div>
                         </div>
 
@@ -140,7 +145,10 @@
                             </div>
                             <div class="flex items-center text-sm text-green-600">
                                 <i class="bi bi-currency-dollar me-2 text-green-600"></i>
-                                <span>₵{{ number_format($trip->route->price, 2) }} per seat</span>
+                                <span>₵{{ number_format($trip->effective_price, 2) }} per seat</span>
+                                @if($trip->hasCustomPrice())
+                                    <span class="text-xs text-blue-600 ml-1">(Custom)</span>
+                                @endif
                             </div>
                         </div>
 

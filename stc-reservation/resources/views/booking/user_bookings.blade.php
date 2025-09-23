@@ -16,6 +16,10 @@
                     <div class="text-xs md:text-sm font-medium">Total Bookings</div>
                     <div class="text-xl md:text-2xl font-bold">{{ $bookings->count() }}</div>
                 </div>
+                <div class="bg-green-50 text-green-800 px-3 md:px-4 py-2 rounded-lg">
+                    <div class="text-xs md:text-sm font-medium">Total Spent</div>
+                    <div class="text-xl md:text-2xl font-bold">₵{{ number_format($bookings->sum(function($booking) { return $booking->trip->price; }), 2) }}</div>
+                </div>
             </div>
         </div>
     </div>
@@ -100,6 +104,21 @@
                             <i class="bi bi-clock me-2"></i>
                             <span>Departure: {{ \Carbon\Carbon::parse($booking->trip->departure_time)->format('g:i A') }}</span>
                         </div>
+                        <div class="flex items-center justify-between text-xs md:text-sm">
+                            <div class="flex items-center text-gray-600">
+                                <i class="bi bi-currency-dollar me-2"></i>
+                                <span>Price:</span>
+                            </div>
+                            <div class="font-semibold text-green-600">
+                                ₵{{ number_format($booking->trip->price, 2) }}
+                            </div>
+                        </div>
+                        @if($booking->trip->hasCustomPrice())
+                        <div class="flex items-center text-xs text-blue-600">
+                            <i class="bi bi-tag me-1"></i>
+                            <span>Custom Price</span>
+                        </div>
+                        @endif
                     </div>
 
                     <!-- Trip Status Indicators -->

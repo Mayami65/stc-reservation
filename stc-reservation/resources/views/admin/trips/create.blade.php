@@ -23,7 +23,7 @@
                         <option value="">Select a route</option>
                         @foreach($routes as $route)
                             <option value="{{ $route->id }}" {{ old('route_id') == $route->id ? 'selected' : '' }}>
-                                {{ $route->origin }} → {{ $route->destination }}
+                                {{ $route->origin }} → {{ $route->destination }} (₵{{ number_format($route->price, 2) }})
                             </option>
                         @endforeach
                     </select>
@@ -82,7 +82,7 @@
                 <div class="mb-6">
                     <label for="price" class="block text-sm font-medium text-gray-700 mb-2">
                         Price per Seat (GHS) 
-                        <span class="text-gray-500 text-xs">(Leave empty to use route default price)</span>
+                        <span class="text-gray-500 text-xs">(Leave empty to use route price)</span>
                     </label>
                     <input type="number" 
                            id="price" 
@@ -90,16 +90,36 @@
                            value="{{ old('price') }}"
                            step="0.01"
                            min="0"
-                           placeholder="Enter custom price or leave empty for route default"
+                           placeholder="Enter custom price or leave empty for route price"
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     @error('price')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                     @enderror
                     <p class="text-sm text-gray-500 mt-1">
                         <i class="bi bi-info-circle me-1"></i>
-                        If left empty, the route's default price will be used for this trip.
+                        If left empty, the trip will use the route's price (₵<span id="routePrice">0.00</span>).
                     </p>
                 </div>
+
+                <script>
+                document.getElementById('route_id').addEventListener('change', function() {
+                    const routeId = this.value;
+                    const routePriceSpan = document.getElementById('routePrice');
+                    
+                    if (routeId) {
+                        // Get route price from the selected option or make an AJAX call
+                        const selectedOption = this.options[this.selectedIndex];
+                        const routeText = selectedOption.text;
+                        const priceMatch = routeText.match(/₵([\d,]+\.?\d*)/);
+                        
+                        if (priceMatch) {
+                            routePriceSpan.textContent = priceMatch[1];
+                        }
+                    } else {
+                        routePriceSpan.textContent = '0.00';
+                    }
+                });
+                </script>
 
                 @if($routes->isEmpty() || $buses->isEmpty())
                     <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">

@@ -20,6 +20,31 @@ class Trip extends Model
         'price' => 'decimal:2',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Set trip price equal to route price if not provided
+        static::creating(function ($trip) {
+            if ($trip->price === null && $trip->route_id) {
+                $route = Route::find($trip->route_id);
+                if ($route) {
+                    $trip->price = $route->price;
+                }
+            }
+        });
+
+        // Update trip price when route changes
+        static::updating(function ($trip) {
+            if ($trip->isDirty('route_id') && $trip->price === null) {
+                $route = Route::find($trip->route_id);
+                if ($route) {
+                    $trip->price = $route->price;
+                }
+            }
+        });
+    }
+
     public function route()
     {
         return $this->belongsTo(Route::class);
@@ -37,7 +62,7 @@ class Trip extends Model
 
     /**
      * Get the effective price for this trip
-     * Returns trip-specific price if set, otherwise falls back to route price
+     * Returns trip price (which is now always set to route price if not custom)
      */
     public function getEffectivePriceAttribute()
     {
@@ -45,10 +70,19 @@ class Trip extends Model
     }
 
     /**
-     * Check if this trip has a custom price
+     * Check if this trip has a custom price (different from route price)
      */
     public function hasCustomPrice()
     {
-        return $this->price !== null;
+        return $this->price !== null && $this->price != $this->route->price;
+    }
+
+    /**
+     * Set the trip price to route price (reset to default)
+     */
+    public function resetToRoutePrice()
+    {
+        $this->price = $this->route->price;
+        $this->save();
     }
 }

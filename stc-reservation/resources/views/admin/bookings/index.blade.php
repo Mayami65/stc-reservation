@@ -17,6 +17,10 @@
                         <div class="text-sm font-medium">Total Bookings</div>
                         <div class="text-2xl font-bold">{{ $bookings->total() }}</div>
                     </div>
+                    <div class="bg-green-50 text-green-800 px-4 py-2 rounded-lg">
+                        <div class="text-sm font-medium">Total Revenue</div>
+                        <div class="text-2xl font-bold">₵{{ number_format($bookings->sum(function($booking) { return $booking->trip->price ?? 0; }), 2) }}</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -106,6 +110,12 @@
                             </th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                                 <div class="flex items-center">
+                                    <i class="bi bi-currency-dollar mr-2"></i>
+                                    Price
+                                </div>
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                <div class="flex items-center">
                                     <i class="bi bi-info-circle mr-2"></i>
                                     Status
                                 </div>
@@ -148,6 +158,14 @@
                                     <i class="bi bi-grid-1x2 mr-1"></i>
                                     {{ $booking->seat->seat_number ?? '-' }}
                                 </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-green-600">₵{{ number_format($booking->trip->price ?? 0, 2) }}</div>
+                                @if($booking->trip && $booking->trip->hasCustomPrice())
+                                    <div class="text-xs text-blue-600">Custom</div>
+                                @else
+                                    <div class="text-xs text-gray-500">Route</div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @php 

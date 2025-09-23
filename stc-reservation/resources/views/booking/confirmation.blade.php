@@ -47,6 +47,16 @@
                                 <span class="text-gray-600">Bus:</span>
                                 <span class="font-medium">{{ $booking->trip->bus->name }}</span>
                             </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Price per Seat:</span>
+                                <span class="font-medium text-green-600">₵{{ number_format($booking->trip->price, 2) }}</span>
+                            </div>
+                            @if($booking->trip->hasCustomPrice())
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Price Type:</span>
+                                <span class="font-medium text-blue-600 text-xs">Custom Price</span>
+                            </div>
+                            @endif
                         </div>
                     </div>
 

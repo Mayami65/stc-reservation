@@ -38,9 +38,9 @@ class TripController extends Controller
 
         $data = $request->only(['route_id', 'bus_id', 'departure_date', 'departure_time', 'price']);
         
-        // Convert empty string to null for price
+        // If price is empty or null, it will be automatically set to route price in the model
         if (empty($data['price'])) {
-            $data['price'] = null;
+            unset($data['price']); // Let the model handle setting it to route price
         }
 
         Trip::create($data);
@@ -75,9 +75,9 @@ class TripController extends Controller
 
         $data = $request->only(['route_id', 'bus_id', 'departure_date', 'departure_time', 'price']);
         
-        // Convert empty string to null for price
+        // If price is empty or null, it will be automatically set to route price in the model
         if (empty($data['price'])) {
-            $data['price'] = null;
+            unset($data['price']); // Let the model handle setting it to route price
         }
 
         $trip->update($data);
